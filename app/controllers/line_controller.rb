@@ -24,8 +24,10 @@ class LineController < ApplicationController
                   type: 'text',
                   text: message_processing(event.message['text'])
               }
-
               client.reply_message(event['replyToken'], message)
+            when Line::Bot::Event::MessageType::Image
+
+
           end
       end
     end
