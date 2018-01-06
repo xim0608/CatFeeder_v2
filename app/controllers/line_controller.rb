@@ -2,6 +2,17 @@ class LineController < ApplicationController
   require 'line/bot'
   protect_from_forgery :except => [:callback]
 
+  def send_testing
+    user = User.find(params[:id])
+    raise unless user.present?
+    message = {
+        type: 'text',
+        text: 'hello'
+    }
+    client.push_message(user.line_user_id, message)
+    render json: {'status': 'success'}
+  end
+
 
   def callback
     body = request.body.read
@@ -18,15 +29,18 @@ class LineController < ApplicationController
     events.each do |event|
       case event
         when Line::Bot::Event::Message
+          user = User.find_or_create_by(line_user_id: event['source']['userId'])
           case event.type
             when Line::Bot::Event::MessageType::Text
               message = {
                   type: 'text',
-                  text: message_processing(event.message['text'])
+                  text: message_processing(event.message['text'] + user.line_user_id)
               }
               client.reply_message(event['replyToken'], message)
             when Line::Bot::Event::MessageType::Image
-
+              response = client.get_message_content(event.message['id'])
+              tf = Tempfile.open("content")
+              tf.write(response.body)
 
           end
       end
