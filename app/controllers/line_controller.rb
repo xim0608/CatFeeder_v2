@@ -1,7 +1,5 @@
 class LineController < ApplicationController
   require 'line/bot'
-  # require 'zbar'
-  require "google/cloud/vision"
   protect_from_forgery :except => [:callback]
 
   def send_testing
