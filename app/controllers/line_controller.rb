@@ -1,9 +1,13 @@
 class LineController < ApplicationController
   require 'line/bot'
+  # require 'zbar'
+  require "google/cloud/vision"
   protect_from_forgery :except => [:callback]
 
   def send_testing
-    user = User.find(params[:id])
+    uuid = request.headers['HTTP_ACCESS_TOKEN_UUID']
+    user = User.find_by(client_uuid: uuid)
+    logger.info(user)
     raise unless user.present?
     message = {
         type: 'text',
@@ -12,7 +16,6 @@ class LineController < ApplicationController
     client.push_message(user.line_user_id, message)
     render json: {'status': 'success'}
   end
-
 
   def callback
     body = request.body.read
@@ -34,14 +37,16 @@ class LineController < ApplicationController
             when Line::Bot::Event::MessageType::Text
               message = {
                   type: 'text',
-                  text: message_processing(event.message['text'] + user.line_user_id)
+                  text: message_processing(event.message['text'], user)
               }
               client.reply_message(event['replyToken'], message)
             when Line::Bot::Event::MessageType::Image
               response = client.get_message_content(event.message['id'])
-              tf = Tempfile.open("content")
-              tf.write(response.body)
-
+            # tf = Tempfile.open("content")
+            # tf.write(response.body)
+            # file_name = "#{Rails.root}/tmp/#{SecureRandom.uuid}.jpg"
+            # file = File.open(file_name, "w+b")
+            # file.write(response.body)
           end
       end
     end
@@ -57,12 +62,35 @@ class LineController < ApplicationController
     }
   end
 
-  def message_processing(message)
+  def message_processing(message, user)
     case message
       when 'えさをやる'
         return 'えさをやったよ'
       else
-        return message
+        if is_uuid?(message)
+          logger.info("is uuid ! #{message}")
+          if user.client_uuid.present?
+            msg = '古いラズパイの情報を上書きし、再登録しました'
+          else
+            msg = 'ラズパイと連携しました'
+          end
+          user.client_uuid = message
+          user.save!
+          return msg
+        end
+        return 'はい？'
+    end
+  end
+
+  def is_uuid?(uuid)
+    return false unless uuid.length == 36
+    v = uuid =~ /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+    if v == 0
+      logger.info("is uuid ! #{uuid}")
+      true
+    else
+      logger.info("not uuid ! #{uuid}")
+      false
     end
   end
 
