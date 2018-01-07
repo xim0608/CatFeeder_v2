@@ -33,6 +33,8 @@ gem 'dotenv-rails', require: 'dotenv/rails-now'
 gem 'redis', '~> 3.0'
 # gem 'evented-redis'
 gem 'async'
+gem 'rmagick'
+gem 'carrierwave'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
