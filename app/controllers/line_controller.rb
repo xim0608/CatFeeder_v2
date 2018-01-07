@@ -1,8 +1,8 @@
 class LineController < ApplicationController
   require 'line/bot'
-  protect_from_forgery :except => [:callback]
+  protect_from_forgery :except => [:callback, :send_photo]
 
-  def send_testing
+  def send_notice
     uuid = request.headers['HTTP_ACCESS_TOKEN_UUID']
     user = User.find_by(client_uuid: uuid)
     logger.info(user)
@@ -10,6 +10,22 @@ class LineController < ApplicationController
     message = {
         type: 'text',
         text: 'hello'
+    }
+    client.push_message(user.line_user_id, message)
+    render json: {'status': 'success'}
+  end
+
+  def send_photo
+    uuid = request.headers['HTTP_ACCESS_TOKEN_UUID']
+    user = User.find_by(client_uuid: uuid)
+    logger.info(user)
+    # logger.info(params[:media].tempfile.read)
+    # TODO: save image and send url
+    raise unless user.present?
+    message = {
+        type: 'image',
+        originalContentUrl: 'hello',
+        previewImageUrl: 'hello'
     }
     client.push_message(user.line_user_id, message)
     render json: {'status': 'success'}
