@@ -30,7 +30,9 @@ gem 'jbuilder', '~> 2.5'
 gem 'line-bot-api'
 gem 'dotenv-rails', require: 'dotenv/rails-now'
 # Use Redis adapter to run Action Cable in production
-# gem 'redis', '~> 3.0'
+gem 'redis', '~> 3.0'
+# gem 'evented-redis'
+gem 'async'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
