@@ -63,6 +63,7 @@ class LineController < ApplicationController
   def message_processing(message, user)
     case message
       when 'えさをやる'
+        FeedChannel.broadcast_to(user, 'Feed!!!!')
         return 'えさをやったよ'
       else
         if is_uuid?(message)
