@@ -10,10 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180107102833) do
+ActiveRecord::Schema.define(version: 20180108033758) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "images", force: :cascade do |t|
+    t.string "image"
+    t.bigint "user_id"
+    t.index ["user_id"], name: "index_images_on_user_id"
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "line_user_id"

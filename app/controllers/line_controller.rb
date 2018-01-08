@@ -22,13 +22,19 @@ class LineController < ApplicationController
     # logger.info(params[:media].tempfile.read)
     # TODO: save image and send url
     raise unless user.present?
-    message = {
-        type: 'image',
-        originalContentUrl: 'hello',
-        previewImageUrl: 'hello'
-    }
-    client.push_message(user.line_user_id, message)
-    render json: {'status': 'success'}
+    cat_image = user.images.build(image: File.open(params[:media].tempfile))
+    if cat_image.save
+      message = {
+          type: 'image',
+          originalContentUrl: cat_image.image.url,
+          previewImageUrl: cat_image.image.url
+      }
+      logger.info("message: #{message}")
+      client.push_message(user.line_user_id, message)
+      render json: {'status': 'success'}
+    else
+      render json: {'status': 'failed'}
+    end
   end
 
   def callback
